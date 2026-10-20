@@ -41,6 +41,25 @@ Stáhněte repozitář (zelené tlačítko **Code → Download ZIP** na GitHubu,
 
 Pak Claude Code restartujte.
 
+### Varianta C – v prohlížeči přes Google Colab (bez instalace)
+[![Otevřít v Colabu](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Kjubit1988/rodokmen-skill/blob/main/colab/Rodokmen.ipynb)
+
+Notebook `colab/Rodokmen.ipynb` všechno nainstaluje do virtuálního počítače Googlu a projekt ukládá na váš
+**Google Disk** (Můj disk/Rodokmen). S AI si píšete přímo v notebooku. Vybrat můžete **Claude** (Claude Code, klíč
+k Anthropic API) nebo **Gemini** (Gemini CLI, klíč k Google AI Studio). Oba dostanou stejný skill. Platí se podle
+spotřeby API, předplatné se sem nepočítá.
+
+| Model | Cena za 1M tokenů (vstup / výstup) | Kdy |
+|---|---|---|
+| **Claude Sonnet 5.5** – doporučeno | $2 / $10 | celý rodokmen; skill je psaný a vyzkoušený pro Claude Code |
+| Claude Opus 5.5 | $4 / $20 | nejtěžší čtení (kurent, latinské zkratky), přepínat jen na sporná místa |
+| Gemini 3.1 Pro (preview) | $2 / $12 (nad 200 tisíc tokenů v dotazu $4 / $18) | alternativa, se skillem zatím nevyzkoušená |
+| Gemini 3.8 Flash | $0,75 / $3,75 do 31. 12. 2026, pak $1,50 / $7,50 | nejlevnější, na rozhovor a jednodušší práci |
+
+Ceny jsou k 20. 10. 2026. Rozdíly oproti počítači: AI pracuje bez ptaní (v notebooku se nedá nic schvalovat),
+nemá prohlížeč (archivy bez hotového nástroje jsou pomalejší) a zveřejnění na Netlify potřebuje osobní token.
+Podrobnosti, klíče a soukromí jsou přímo v notebooku.
+
 ## První spuštění
 1. Spusťte Claude Code (klidně v domovské složce) a napište třeba:
    > Chci udělat rodokmen své rodiny.
@@ -77,6 +96,7 @@ skills/rodokmen/
   tools/             nástroje v Pythonu (ARON, výřezy, rámečky, mapa, kontrola dat, export do webu, vějíř)
   template/          šablona projektu: prázdná data, ukázková rodina, web (Astro)
 .claude-plugin/      instalace jako plugin
+colab/               notebook pro Google Colab (Claude nebo Gemini, záloha na Google Disk)
 ```
 
 ## Co umí a co ne

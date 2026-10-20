@@ -23,6 +23,7 @@ Najdeš v ní `tools/` (nástroje), `template/` (šablona projektu a webu) a `re
 - Dnešní datum (do deníku, STAV.md) ber z příkazu `date`, ne z hlavy.
 
 ## Na začátku každé konverzace
+0. Běžíš v Google Colabu (proměnná prostředí `RODOKMEN_COLAB=1`)? → Řiď se i sekcí **Google Colab** níže.
 1. Jsi ve složce projektu? (`data/STAV.md` existuje.) → Přečti `data/STAV.md`, konec `data/research_log.md`
    a pokračuj podle sekce „Rozpracováno“. Krátce uživateli shrň, kde jste skončili.
 2. Projekt ještě není → **Fáze 0**.
@@ -141,6 +142,28 @@ Podrobně `reference/web.md`. Ve zkratce:
 Výchozí cesta je **Netlify** (zdarma): `npm run nasadit`. Přihlášení k Netlify a první propojení webu jsou interaktivní –
 dej je uživateli jako `! npx netlify-cli login` atd. (postup v `reference/web.md`). Pokročilá varianta: vlastní server (Docker/CapRover).
 Nic nezveřejňuj bez výslovného souhlasu uživatele.
+
+## Google Colab
+Notebook `colab/Rodokmen.ipynb` spouští tebe (Claude Code) nebo Gemini CLI. Každá zpráva uživatele je jedno spuštění,
+rozhovor pokračuje, dokud běží virtuální počítač. Pak začíná nový a navážeš podle `data/STAV.md`, proto ho průběžně aktualizuj.
+- **Fáze 0 je hotová.** Notebook nainstaloval programy (Python, Node.js, git a ImageMagick 6 s náhradním příkazem
+  `magick`), založil nebo obnovil projekt v `/content/Rodokmen` a udělal první uložení do gitu. Začni Fází 1, nebo pokračuj podle `STAV.md`.
+- **Záloha:** po každé odpovědi notebook zkopíruje projekt na Google Disk (Můj disk/Rodokmen). Na `/content/drive`
+  nesahej. Co není ve složce projektu, se se smazáním virtuálního počítače ztratí.
+- **Uživatel nespouští příkazy** (předpona `!` tu nefunguje) a soubory nevidí. Místo toho mu řekni, co má napsat do rozhovoru:
+  `:nahraj` nahraje dokumenty a fotky do `dokumenty/` (může je dát i na Disk do Rodokmen/dokumenty, notebook je před
+  každou zprávou přenese), `:nahled` postaví web a ukáže odkaz na náhled (místo `npm run nahled` a localhost),
+  `:ukazka` ukázkový web s vymyšlenou rodinou.
+- **Obrázek ukážeš** Markdownem s cestou v projektu, např. `![Křest Jana 1890](pracovni/ramecek_holice_krest_jan_novak_1890.jpg)`,
+  a notebook ho zobrazí. Sporná čtení ukazuj takhle po menších dávkách místo HTML stránky s odpověďmi.
+- **Prohlížeč nemáš.** Archivy bez hotového nástroje zkus stažením stránky (WebFetch / web_fetch, curl). Když to nejde,
+  požádej uživatele, ať knihu najde v prohlížeči a pošle ti odkaz nebo číslo snímku.
+- **Pomocníci (subagenti):** v Claude Code podle pravidel výše. V Gemini CLI je nespouštěj, pracuj postupně sám.
+- **Netlify:** interaktivní přihlášení tu nejde. Uživatel si v Netlify vytvoří osobní token (User settings → Applications →
+  Personal access tokens) a uloží ho do Tajných klíčů Colabu jako `NETLIFY_AUTH_TOKEN`. Notebook ho předá, `netlify-cli`
+  si ho přečte sám. Web založ neinteraktivně (`npx -y netlify-cli@latest sites:create --name <název>`, příp. `--account-slug`)
+  a nasaď `npm run nasadit`.
+- Shell je bash, ne zsh: pasti se zsh z `reference/matriky.md` tu neplatí.
 
 ## Poznámky pro správce skillu
 Skill se zlepšuje podle zkušeností lidí, kteří ho používají. Proto **průběžně zapisuj do `poznamky_pro_skill.md`**
