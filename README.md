@@ -45,7 +45,9 @@ Pak Claude Code restartujte.
 [![Otevřít v Colabu](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Kjubit1988/rodokmen-skill/blob/main/colab/Rodokmen.ipynb)
 
 Notebook `colab/Rodokmen.ipynb` všechno nainstaluje do virtuálního počítače Googlu a projekt ukládá na váš
-**Google Disk** (Můj disk/Rodokmen). S AI si píšete přímo v notebooku. Vybrat můžete **Claude** (Claude Code, klíč
+**Google Disk** (Můj disk/Rodokmen). S AI si píšete přímo v notebooku. Po rozhovoru o rodině ji můžete nechat
+**hledat v matrikách samotnou** (příkaz `:samo`, s limitem kol, útraty a času) a sporná místa s ní projít potom.
+Vybrat můžete **Claude** (Claude Code, klíč
 k Anthropic API) nebo **Gemini** (Gemini CLI, klíč k Google AI Studio). Oba dostanou stejný skill. Platí se podle
 spotřeby API, předplatné se sem nepočítá.
 

@@ -121,6 +121,24 @@ Linie končí, když matriky mlčí (nemanželské dítě bez otce, shořelé kn
 v 17. století. Zapiš to do `ISSUES`/`archivni_dotazy.md` a jdi na jinou větev. Průběžně aktualizuj `data/STAV.md`
 („Rozpracováno“), aby šlo kdykoli navázat.
 
+### Samostatný výzkum
+Uživatel tě může nechat hledat samotného (v Colabu příkaz `:samo`, jinak třeba „pracuj sám, než se vrátím“).
+Každé kolo je jedno spuštění: dostaneš pokyn a pracuješ bez ptaní, dokud cíl nedotáhneš.
+- **Předpoklad je hotová Fáze 1**: víš, pro koho rodokmen je, a máš aspoň rodiče a prarodiče. Jinak napiš, co od uživatele
+  potřebuješ, a skonči značkou z pokynu.
+- **Jedno kolo = jeden cíl.** Podle `STAV.md` („Rozpracováno“) a `osoby.py` vyber nejslibnějšího předka bez dokladu a projdi
+  s ním smyčku Fáze 2 (od nejmladšího zápisu, všech 6 kroků zápisu, deník). Když najdeš rodiče, další generaci nech na další kolo.
+- **Spornou věc nerozhoduj.** Zapiš ji do `pracovni/sporna_cteni.json` a `ISSUES`, osobu nech `prob` a jdi na jinou větev.
+  Uživatel je projde, až se vrátí („Ukaž mi sporná čtení“ – ukazuj je po menších dávkách s výřezem).
+- **Kvalita jako jindy**: `doc` jen to, co jsi četl na snímku. Pravidla výše i „Co nikdy“ platí beze změny (žádné placené
+  služby, hesla, CAPTCHA, zveřejňování webu).
+- **Pomocníky (subagenty) v tomto režimu nespouštěj**, pokud je uživatel výslovně nepovolil. Drží to útratu pod kontrolou.
+- **Zajímavosti** zapisuj průběžně, příběh rodu ale piš až se souhlasem.
+- **Na konci kola** aktualizuj `STAV.md` (co je hotové, co čeká na uživatele), spusť `kontrola.py`, ulož do gitu
+  (`git add -A && git commit -m "Samo: …"`) a napiš 2–4 věty: co jsi našel, kolik je osob a zápisů, kam míříš dál.
+- **Když už bez uživatele nejde pokračovat** (zbývají jen sporná místa, údaje za lhůtou na matričním úřadě nebo chybí
+  údaje od rodiny), napiš to a na poslední řádek dej značku z pokynu (`HOTOVO-SAMO`).
+
 ## Fáze 3 – Zajímavosti a Příběh hlavního rodu
 Podrobně `reference/pribehy.md`. Tohle je to, co rodina na webu čte nejradši, takže na to nezapomínej a nenechávej to na konec.
 - **Zajímavosti** („fun facts“) sbírej **průběžně**: co najdeš při čtení, hned zapiš do `data/zajimavosti.md`
@@ -153,7 +171,8 @@ rozhovor pokračuje, dokud běží virtuální počítač. Pak začíná nový a
 - **Uživatel nespouští příkazy** (předpona `!` tu nefunguje) a soubory nevidí. Místo toho mu řekni, co má napsat do rozhovoru:
   `:nahraj` nahraje dokumenty a fotky do `dokumenty/` (může je dát i na Disk do Rodokmen/dokumenty, notebook je před
   každou zprávou přenese), `:nahled` postaví web a ukáže odkaz na náhled (místo `npm run nahled` a localhost),
-  `:ukazka` ukázkový web s vymyšlenou rodinou.
+  `:ukazka` ukázkový web s vymyšlenou rodinou, `:samo` samostatný výzkum (viz „Samostatný výzkum“).
+  Až bude Fáze 1 hotová, nabídni uživateli `:samo`.
 - **Obrázek ukážeš** Markdownem s cestou v projektu, např. `![Křest Jana 1890](pracovni/ramecek_holice_krest_jan_novak_1890.jpg)`,
   a notebook ho zobrazí. Sporná čtení ukazuj takhle po menších dávkách místo HTML stránky s odpověďmi.
 - **Prohlížeč nemáš.** Archivy bez hotového nástroje zkus stažením stránky (WebFetch / web_fetch, curl). Když to nejde,

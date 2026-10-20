@@ -45,6 +45,10 @@ decision = "deny"
 priority = 990
 denyMessage = "Google Disk je jen pro zálohu, kterou dělá notebook. Pracuj v {PROJEKT}."
 """
+SAMO_KONEC = "HOTOVO-SAMO"
+SAMO_POKYN = ("[Samostatný výzkum – kolo {kolo} z nejvýš {kol}] Pracuj sám podle sekce „Samostatný výzkum“ "
+              "ve skillu rodokmen: vezmi další cíl, dotáhni ho, zapiš a ulož. Na nic se neptej. Na konci napiš "
+              f"2–4 věty, co jsi zjistil. Když bez uživatele nemůžeš pokračovat, napiš na poslední řádek {SAMO_KONEC} a proč.")
 POZNAMKA_COLAB = f"""# Rodokmen v Google Colabu
 Běžíš v Google Colabu, ne na počítači uživatele. Uživatel s tebou mluví přes notebook Rodokmen.ipynb
 a tvoje odpovědi vidí jako Markdown. Projekt je v {PROJEKT}. Řiď se skillem rodokmen a jeho sekcí „Google Colab“.
@@ -286,6 +290,8 @@ NAPOVEDA = """Příkazy (místo zprávy):
   :nahled          postavit web a ukázat náhled
   :ukazka          ukázkový web s vymyšlenou rodinou
   :ukaz <soubor>   zobrazit obrázek z projektu
+  :samo [kola] [$limit] [minuty m]
+                   AI hledá v matrikách sama, kolo po kole (výchozí 10 kol, $5, 120 m); zastavíte ■
   :model <název>   přepnout model: sonnet, opus, pro, flash
   :uloz            hned uložit na Google Disk (jinak se ukládá po každé odpovědi)
   :konec           uložit a skončit"""
@@ -333,6 +339,16 @@ def _prikaz(text, stav):
             ukaz(arg)
         elif prikaz == "uloz":
             zalohovat()
+        elif prikaz == "samo":
+            limity = {}
+            for slovo in arg.split():
+                if slovo.startswith("$"):
+                    limity["limit_usd"] = float(slovo[1:].replace(",", "."))
+                elif slovo.lower().endswith("m"):
+                    limity["minut"] = int(slovo[:-1])
+                else:
+                    limity["kol"] = int(slovo)
+            _samo(stav, **limity)
         elif prikaz == "model" and ZKRATKY.get(arg.lower()):
             nova = ZKRATKY[arg.lower()]
             if MODELY[nova][0] != MODELY[stav["volba"]][0]:
@@ -348,7 +364,45 @@ def _prikaz(text, stav):
         print("Chyba:", e)
 
 
-def _poslat(zprava, stav):
+def samo(volba, kol=10, limit_usd=5.0, minut=120):
+    """Samostatný výzkum: AI hledá kolo po kole, dokud nenarazí na limit, nepotřebuje uživatele, nebo ji nezastavíte ■."""
+    stav = _nacist_stav()
+    stav["volba"] = volba
+    _samo(stav, kol, limit_usd, minut)
+
+
+def _samo(stav, kol=10, limit_usd=5.0, minut=120):
+    zacatek, utraceno, kolo = time.time(), 0.0, 0
+    print(f"Samostatný výzkum: nejvýš {kol} kol, ${limit_usd:.2f}, {minut} minut. Zastavíte ho tlačítkem ■ "
+          "(rozpracované kolo se přeruší, uložené zůstane).")
+    try:
+        while kolo < kol:
+            kolo += 1
+            print(f"\n──── Kolo {kolo} z {kol} ────", flush=True)
+            vypis = _poslat(SAMO_POKYN.format(kolo=kolo, kol=kol), stav, limit_usd=max(0.1, limit_usd - utraceno))
+            zalohovat(tise=True)
+            utraceno += vypis.usd or 0
+            if SAMO_KONEC in vypis.cely:
+                print("\nAI teď bez vás nepokračuje (důvod je v odpovědi výše).")
+                break
+            if vypis.chyby:
+                print("\nKolo skončilo chybou, zastavuji.")
+                break
+            if utraceno >= limit_usd:
+                print(f"\nDosažen limit útraty ${limit_usd:.2f}.")
+                break
+            if time.time() - zacatek > minut * 60:
+                print(f"\nUplynulo {minut} minut.")
+                break
+    except KeyboardInterrupt:
+        print("\nSamostatný výzkum zastaven.")
+    zalohovat()
+    print(f"Konec samostatného výzkumu: {kolo} kol, útrata asi ${utraceno:.2f}, "
+          f"{round((time.time() - zacatek) / 60)} minut. Sporná místa vám AI ukáže, když napíšete "
+          "„Ukaž mi sporná čtení“.")
+
+
+def _poslat(zprava, stav, limit_usd=None):
     agent, model, ceny = MODELY[stav["volba"]]
     if _disk_pripojen() and os.path.isdir(os.path.join(DISK, "dokumenty")):
         _kopirovat(os.path.join(DISK, "dokumenty"), os.path.join(PROJEKT, "dokumenty"))   # co uživatel dal na Disk
@@ -358,6 +412,8 @@ def _poslat(zprava, stav):
         sid = stav.get("claude")
         if sid and glob.glob(os.path.expanduser(f"~/.claude/projects/*/{sid}.jsonl")):
             cmd += ["--resume", sid]
+        if limit_usd:
+            cmd += ["--max-budget-usd", f"{limit_usd:.2f}"]
         vstup, zpracovat = zprava, _udalost_claude
     else:
         cmd = ["gemini", f"--prompt={zprava}", "--output-format", "stream-json", "--model", model,
@@ -389,6 +445,8 @@ def _poslat(zprava, stav):
     if proc.returncode and not vypis.neco:
         print(f"Agent skončil s chybou ({proc.returncode}):")
         print(open(os.path.join(STAV, "chyby.log"), encoding="utf-8", errors="replace").read()[-2000:])
+        vypis.chyby += 1
+    return vypis
 
 
 def _udalost_claude(u, stav, vypis, ceny):
@@ -406,8 +464,8 @@ def _udalost_claude(u, stav, vypis, ceny):
     elif typ == "result":
         if u.get("is_error"):
             vypis.chyba(u.get("result") or u.get("subtype"))
-        if u.get("total_cost_usd") is not None and os.environ.get("ANTHROPIC_API_KEY"):
-            vypis.cena(u["total_cost_usd"])
+        if u.get("total_cost_usd") is not None:   # s předplatným (OAuth) je cena jen orientační, nevypisujeme ji
+            vypis.cena(u["total_cost_usd"], tisknout=bool(os.environ.get("ANTHROPIC_API_KEY")))
 
 
 def _udalost_gemini(u, stav, vypis, ceny):
@@ -443,7 +501,7 @@ class _Vypis:
     OBRAZEK = re.compile(r"!\[([^\]]*)\]\(([^)\s]+)\)")
 
     def __init__(self):
-        self.buffer, self.neco = "", False
+        self.buffer, self.neco, self.cely, self.usd, self.chyby = "", False, "", None, 0
 
     def pridat(self, kus):
         self.buffer += kus
@@ -461,10 +519,13 @@ class _Vypis:
         zpravy = re.findall(r'message\\*"\s*:\s*\\*"([^"\\]+)', str(zprava))   # z vnořeného JSON jen text chyby
         print("⚠ " + (zpravy[-1] if zpravy else str(zprava)[:500]), flush=True)
         self.neco = True
+        self.chyby += 1
 
-    def cena(self, usd, odhad=False):
+    def cena(self, usd, odhad=False, tisknout=True):
         self._vypsat()
-        print(f"  (cena této odpovědi {'asi ' if odhad else ''}${usd:.3f})", flush=True)
+        self.usd = usd
+        if tisknout:
+            print(f"  (cena této odpovědi {'asi ' if odhad else ''}${usd:.3f})", flush=True)
 
     def dokoncit(self):
         self._vypsat()
@@ -474,6 +535,7 @@ class _Vypis:
         if not text:
             return
         self.neco = True
+        self.cely += text + "\n"
         try:
             from IPython.display import Image, Markdown, display
         except ImportError:
